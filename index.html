@@ -1,0 +1,255 @@
+<!doctype html>
+<html lang="en">    
+<head>
+    <meta charset="utf-8">
+    <title>Mining Twitter with Python</title>
+      <link
+      href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900,200italic,300italic,600italic,700italic,900italic|Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" href="css/reveal.min.css">
+    <link rel="stylesheet" href="css/style.css" id="theme">    
+</head>
+ 
+<body>
+    <div class="reveal">
+      <div class="slides">
+
+            <section>
+              <h2>Mining Twitter with Python</h2>
+              <p> <em>
+                <!-- em will make the words italic -->
+              Brought to you by 
+              <a href="http://codekitchen.mit.edu/">
+              CodeKitchen
+              </a>
+              </em>
+              </p>
+            </section>
+
+            <section>
+              <h2>Before we start</h2>
+              <p>
+              Make sure you have 
+              <a href="https://www.python.org/download/releases/2.7/">Python,</a>
+              <a href="http://www.sublimetext.com/2">Sublime Text</a>
+              or some other 
+              <a href="http://codekitchen.mit.edu/tutorials/text-editors/">text editor</a>
+              installed.
+              </p>
+            </section>
+
+            <section>
+              <p>In this workshop we will talk about is API and how to
+              interact with it through example of Twitter's API.
+              </p>
+            </section>
+
+            <section>
+              This is a <strong>hands on</strong> workshop. Feel free to pause me any time if something is not clear.
+            </section>
+
+            <section>
+              <h2>Part 1: What is an API?</h2>
+            </section>
+
+            <section>
+              <p><strong>API</strong> stands for <strong>A</strong>pplication <strong>P</strong>rogramming <strong>I</strong>nterface. Formally, it is a set of routines, protocols, and tools for building software applications. 
+              </p>
+            </section>
+
+            <section>
+              <p>Think of them as <h3>Doors to Code or Data</h3>
+                APIs are sets of requirements that govern how one application can talk to another.
+              </p>
+              <p>
+              </p>
+              <p>APIs "expose" some of a program's internal functions to the outside world in a limited fashion. That makes it possible for applications to share data
+              </p>
+            </section>
+
+            <section>
+              <section id="fragments_page1">
+                <p>Examples: </p>
+                <ul>
+                  <li class="fragment">Yelp displays nearby restaurants on a Google Map in its app  </li>
+                  <li class="fragment">Video games now let players chat and invite friends to play via Facebook, right there in the middle of a game </li>
+                </ul>
+              </section>
+            </section>
+
+            <section>
+              <h2>Part 2: How to interact with Twitter API?</h2>
+            </section> 
+
+            <section>
+              <p>
+                There are multiple ways to interact with Twitter API - you can search for specific tweets in some location, get realtime stream data, look for tweets of particular users, etc. In this workshop, we will be demonstrating <strong>how to get tweets based on a list of twitter handles.</strong> 
+              </p>
+            </section>
+
+            <section>
+              <section id="fragments_page2">
+                <p>High level outline of how we will proceed: </p>
+                <ul>
+                  <li class="fragment">Create a list of Twitter users we want to get tweets for  (as a <code>.csv</code> file)</li>
+                  <li class="fragment"> Import the <code>.csv</code> file as a table in sqlite database</li>
+                  <li class="fragment"> Use the database table to <strong>request</strong> data from Twitter</li>
+                  <li class="fragment"> Save <strong>response</strong> from Twitter as another table in sqlite database </li>
+                </ul>
+              </section>
+            </section>
+
+            <section>
+              <h2>Part 2.1: Setting up API keys</h2>
+            </section>
+
+            <section>
+              <p> The first step is to make sure we have a "proper access" to the data on <a href="https://apps.twitter.com/">Twitter. </a> "Proper access" means that you need: <em>API Key, API Secret, Access token, Access token secret</em>. First, go to <a href="https://apps.twitter.com/"><code>https://apps.twitter.com/</code></a>, and sign in with your Twitter account. Go to my applications page to create an application.</p>
+              <img src="img/twitter_app_sign.png" alt="">
+            </section>
+
+
+            <section>
+              <img src="img/app_details.png" alt="">
+            </section>
+
+            <section>
+              <p>After creating the app, go to <strong>Keys and Access Tokens</strong> tab, scroll down to the bottom and click Create my access token. Wait for a few minutes and refresh the page, then you get all your keys! 
+              </p>
+              <img src="img/access_token.png" alt="">
+            </section>
+
+            <section>
+              <p>
+                The next step is to determine which fields per each user we would like to get data on. You can look at <a href="https://dev.twitter.com/overview/api/users">definitions for the variables returned from API</a> later, below is a list of some fields we would like to use in today's workshop.
+              </p>
+              <img src="img/def_vars_twitter1.png">
+            </section>
+
+            <section>
+              <img src="img/def_vars_twitter2.png">
+            </section>
+
+            <section>
+              <h3>Part 2.2: Prepare a Twitter handle list</h3>
+              <img src="img/twitter_handle_list.png">
+            </section>
+
+            <section>
+              <p>
+                Create a CSV file that has 3 columns: id, twitter handle, and an extra column of all 1s(you may leave it blank). Save the file in some folder that makes sense to you. As we create more files, save them in this location as well.
+              </p>
+            </section>
+
+            <section>
+              <h3>Part 2.3: Installing necessary Python packages</h3>
+              <p>To use our code, you need the following libraries:
+                <ul>
+                  <li>Simplejson (<code>https://pypi.python.org/pypi/simplejson</code>)</li>
+                  <li>Twython (<code>https://twython.readthedocs.org/en/latest/index.html</code>)</li>
+                  <li>Sqlalchemy (<code>http://www.sqlalchemy.org/</code>)</li>
+                </ul> 
+              </p>
+              <h3>Before we start installing them...</h3>
+            </section>
+
+            <section>
+              <h3>Let's talk about different types of packages in Python</h3>
+              <img src="img/python_imports.png">
+            </section>
+
+            <section>
+              <h3>Installing necessary external Python libraries</h3>
+              <p><strong>On a Mac or Linux</strong>, open the Terminal and type <code>pip install twython</code>, <code>pip install simplejson</code>, and <code>pip install sqlalchemy</code>.
+              </p>
+              <p><strong>On Windows</strong>, open CMD, type in the command line <code>pip install twython</code> and other packages as above.
+              </p>
+            </section>
+
+            <section>
+              <h3>Part 2.4: Create a SQLite database</h3>
+              <p>Go to <code>http://sqlitebrowser.org/</code> and download SQLite Database Browser. It allows you to view and edit SQLite databases.
+              </p>
+              <img src="img/sqlite_browser.png">
+            </section>
+
+            <section>
+              <p>Go to <strong>File-New Database</strong> to create a new database. </p>
+              <p> Remember the database filename you enter.</p>
+              <p>
+                Add the extension <strong><code>.sqlite</code></strong> when typing filename. (you can also use extension <strong><code>.db</code></strong>)
+              </p>
+            </section>
+
+            <section>
+              <p>Use <strong>File-Import Table From CSV File</strong>, import the <code>.csv</code> file you’ve saved. Name the imported table as <em>accounts</em>. This table name corresponds to the one we will use in Python script. After you click <strong>create</strong>, the csv list will be loaded into the database, and you can browse it in <em>Browse Data</em>. Lastly, remember to save the database. 
+              </p>
+            </section>
+
+            <section>
+              <p>Modify the imported table: Go to <strong>Edit-Modify Tables</strong>, use <em>Edit</em> field to change column names. To correspond to the Python script, name the first column as <em>rowid</em>, and Fileld Type as <code>Integer</code>; the second column as <em>screen_name</em>, and Field type <code>Text</code>, and the third as <em>user_type</em>, and <code>Text</code>. In the end, the database table is defined as the screenshot. 
+
+              </p>
+            </section>
+
+            <section>
+              <h3>Part 2.5: Modify the script and Run</h3>
+              <p><a href="http://web.mit.edu/aizhan/www/twitter_api_workshop/docs/tweets_by_user.py">Download the script</a> and save it as <code>.py</code> file in the same folder where you saved CSV file and the database file. There are just 3 edits you need to make: provide API keys, give correct filepath to database, and provide the name of the table where the data from Twitter will be saved. </p>
+              <p>Within the script, find this block of code, and enter your API Keys.</p>
+              <img src="img/script1_modify.png">
+            </section>
+
+            <section>
+              <p>Find this block of code, and enter the filename and file path of the SQLite database you have created.</p>
+              <img src="img/script2_modify.png">
+            </section>
+
+            <section>
+              <p>You may also refine search criteria:</p>
+              <img src="img/script3_modify.png">
+              <p> <code>count</code> specifies the number of tweets to try and retrieve for each Twitter handle. The maximum value is 200. </p>
+              <p> Read more <a href="https://dev.twitter.com/rest/reference/get/statuses/user_timeline">here</a></p>
+            </section>
+
+            <section>
+              <h3>Some issues you may encounter..</h3>
+              <img src="img/issues_encounter1.png">
+            </section>
+
+            <section>
+              <h3>Some issues you may encounter..</h3>
+              <img src="img/issues_encounter2.png">
+            </section>
+
+            <section>
+              <h2>Load the SQLite data into Excel</h2>
+              <img src="img/load_toexcel.png">
+            </section>
+
+            <section>
+            <section id="fragments_page3">
+              <h3>Important concepts I'd like you to get out of this workshop</h3>
+                <ul>
+                  <li class="fragment"> What is an API </li>
+                  <li class="fragment"> Basic building blocks of Twitter API (oauth, keys, tokens, request, response)</li>
+                  <li class="fragment"> What is database and why is it useful. What is a query</li>
+                  <li class="fragment"> How to navigate through file system of your computer using command line (<code>ls, cd, pwd </code>)</li>
+                  <li class="fragment"> How import statements are structured in a Python script </li>
+                  <li class="fragment"> What is a notion of <code>Class</code> </li>
+                </ul>
+              </section>
+            </section>
+
+      </div>
+    </div>
+    <script src="js/head.min.js"></script>
+    <script src="js/reveal.min.js"></script>
+ 
+    <script>
+        // Required, even if empty.
+        Reveal.initialize({
+            history: true,
+            transition: 'none',
+        });
+    </script>
+</body>
+</html>
