@@ -2,7 +2,7 @@
 <html lang="en">    
 <head>
     <meta charset="utf-8">
-    <title>Mining Twitter with Python</title>
+    <title>Introduction to Databases with Python</title>
       <link
       href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:200,300,400,600,700,900,200italic,300italic,600italic,700italic,900italic|Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
     <link rel="stylesheet" href="css/reveal.min.css">
@@ -14,7 +14,7 @@
       <div class="slides">
 
             <section>
-              <h2>Mining Twitter with Python</h2>
+              <h2>Introduction to Databases with Python</h2>
               <p> <em>
                 <!-- em will make the words italic -->
               Brought to you by 
@@ -38,8 +38,7 @@
             </section>
 
             <section>
-              <p>In this workshop we will talk about is API and how to
-              interact with it through example of Twitter's API.
+              <p>In this workshop we will talk about what is a database, why you might need one and how to interact with it through example of sqlite database and Python.
               </p>
             </section>
 
@@ -48,195 +47,186 @@
             </section>
 
             <section>
-              <h2>Part 1: What is an API?</h2>
+              <h2>Part 1: What is a database?</h2>
             </section>
 
             <section>
-              <p><strong>API</strong> stands for <strong>A</strong>pplication <strong>P</strong>rogramming <strong>I</strong>nterface. Formally, it is a set of routines, protocols, and tools for building software applications. 
+              <p><strong>Database</strong> is a just collection of data. Database software, like MySQL, are just programs that lets you store and retrieve that data as efficiently as possible. 
               </p>
             </section>
 
             <section>
-              <p>Think of them as <h3>Doors to Code or Data</h3>
-                APIs are sets of requirements that govern how one application can talk to another.
+              <p>Ridiculous example: Think about the documents stored on your computer. If you were to save all your documents using a (brain-dead) file naming scheme like "1.doc", "2.doc", "3.doc", ... "9,999,999.doc" (etc), you will eventually face a problem of finding the right file if you're looking for a specific document.
               </p>
-              <p>
-              </p>
-              <p>APIs "expose" some of a program's internal functions to the outside world in a limited fashion. That makes it possible for applications to share data
-              </p>
+            </section> 
+              
+            <section>
+            <img src="img/excel-v-database.jpg" alt="">
             </section>
 
             <section>
               <section id="fragments_page1">
-                <p>Examples: </p>
+                <p>What Excel is good at: </p>
                 <ul>
-                  <li class="fragment">Yelp displays nearby restaurants on a Google Map in its app  </li>
-                  <li class="fragment">Video games now let players chat and invite friends to play via Facebook, right there in the middle of a game </li>
+                  <li class="fragment">It’s easy to <strong>browse</strong> data </li>
+                  <li class="fragment">It’s easy to <strong>manually enter and edit</strong> data </li>
+                  <li class="fragment">You have fine control over <strong>visual presentation</strong>. </li>
+                  <li class="fragment">It has a very <strong>flexible structure</strong>. Every cell is a unique snowflake</li>
+                   <li class="fragment">It has a <strong>built-in suite of helpers</strong> for charts, comments, spellchecking, etc. </li>
                 </ul>
               </section>
-            </section>
-
-            <section>
-              <h2>Part 2: How to interact with Twitter API?</h2>
-            </section> 
-
-            <section>
-              <p>
-                There are multiple ways to interact with Twitter API - you can search for specific tweets in some location, get realtime stream data, look for tweets of particular users, etc. In this workshop, we will be demonstrating <strong>how to get tweets based on a list of twitter handles.</strong> 
-              </p>
             </section>
 
             <section>
               <section id="fragments_page2">
-                <p>High level outline of how we will proceed: </p>
+                <p>What Excel is bad at: </p>
                 <ul>
-                  <li class="fragment">Create a list of Twitter users we want to get tweets for  (as a <code>.csv</code> file)</li>
-                  <li class="fragment"> Import the <code>.csv</code> file as a table in sqlite database</li>
-                  <li class="fragment"> Use the database table to <strong>request</strong> data from Twitter</li>
-                  <li class="fragment"> Save <strong>response</strong> from Twitter as another table in sqlite database </li>
+                  <li class="fragment">It <strong>lacks data integrity</strong>. What you see doesn’t necessarily represent the underlying data. A number is not necessarily a number. Excel tries to make educated guesses about you want, and sometimes it’s wrong. </li>
+                  <li class="fragment">It’s not very good for working with <strong>multiple datasets</strong> in combination. </li>
+                  <li class="fragment">It’s not very good for answering <strong> detailed questions </strong> with your data.</li>
+                  <li class="fragment">It <strong>doesn’t scale</strong>. As the amount of data increases, performance suffers, and the visual interface becomes a liability instead of a benefit.</li>
                 </ul>
               </section>
             </section>
 
             <section>
-              <h2>Part 2.1: Setting up API keys</h2>
-            </section>
-
-            <section>
-              <p> The first step is to make sure we have a "proper access" to the data on <a href="https://apps.twitter.com/">Twitter. </a> "Proper access" means that you need: <em>API Key, API Secret, Access token, Access token secret</em>. First, go to <a href="https://apps.twitter.com/"><code>https://apps.twitter.com/</code></a>, and sign in with your Twitter account. Go to my applications page to create an application.</p>
-              <img src="img/twitter_app_sign.png" alt="">
-            </section>
-
-
-            <section>
-              <img src="img/app_details.png" alt="">
-            </section>
-
-            <section>
-              <p>After creating the app, go to <strong>Keys and Access Tokens</strong> tab, scroll down to the bottom and click Create my access token. Wait for a few minutes and refresh the page, then you get all your keys! 
-              </p>
-              <img src="img/access_token.png" alt="">
-            </section>
+              <h2>Relational databases</h2>
+            </section> 
 
             <section>
               <p>
-                The next step is to determine which fields per each user we would like to get data on. You can look at <a href="https://dev.twitter.com/overview/api/users">definitions for the variables returned from API</a> later, below is a list of some fields we would like to use in today's workshop.
+                Consists of a “server” that stores all your data (think of a huge library) and a mechanism for querying it (think of a reference librarian).
               </p>
-              <img src="img/def_vars_twitter1.png">
-            </section>
-
-            <section>
-              <img src="img/def_vars_twitter2.png">
-            </section>
-
-            <section>
-              <h3>Part 2.2: Prepare a Twitter handle list</h3>
-              <img src="img/twitter_handle_list.png">
-            </section>
-
-            <section>
               <p>
-                Create a CSV file that has 3 columns: id, twitter handle, and an extra column of all 1s(you may leave it blank). Save the file in some folder that makes sense to you. As we create more files, save them in this location as well.
+                Querying is where <strong>SQL</strong> comes in. SQL stands for <em>Structured Query Language</em>, and it is a syntax for requesting things from the database. It’s the language the reference librarian speaks.
               </p>
             </section>
 
             <section>
-              <h3>Part 2.3: Installing necessary Python packages</h3>
-              <p>To use our code, you need the following libraries:
+              <h3>Database Structure</h3>
+              <p>Every database consists of <strong>tables</strong>. Think of a table like a single worksheet in an Excel file, except with more ground rules. A database table consists of <strong>columns</strong> and <strong>rows</strong>.</p>
+            </section>
+
+            <section>
+              <h3>Columns</h3>
+              <p>
+                Every column is given a <strong>name</strong> (like ‘Address’) and a defined <strong>column type</strong> (like ‘Integer,’ ‘Date’, or ‘Text’). You have to pick a column type, and it stays the same for every row. This sounds annoying but is very helpful. If you try to put the wrong kind of data in a column, it will get upset.
+              </p>
+            </section>
+
+            <section>
+              <section id="fragments_page3">
+                <p>You can also specify helpful things like… </p>
                 <ul>
-                  <li>Simplejson (<code>https://pypi.python.org/pypi/simplejson</code>)</li>
-                  <li>Twython (<code>https://twython.readthedocs.org/en/latest/index.html</code>)</li>
-                  <li>Sqlalchemy (<code>http://www.sqlalchemy.org/</code>)</li>
-                </ul> 
-              </p>
-              <h3>Before we start installing them...</h3>
+                  <li class="fragment">whether a column can have duplicate values</li>
+                  <li class="fragment"> whether a column can be empty</li>
+                  <li class="fragment"> the default value for a column if you don’t specify one</li>
+                </ul>
+              </section>
             </section>
 
             <section>
-              <h3>Let's talk about different types of packages in Python</h3>
-              <img src="img/python_imports.png">
-            </section>
-
-            <section>
-              <h3>Installing necessary external Python libraries</h3>
-              <p><strong>On a Mac or Linux</strong>, open the Terminal and type <code>pip install twython</code>, <code>pip install simplejson</code>, and <code>pip install sqlalchemy</code>.
-              </p>
-              <p><strong>On Windows</strong>, open CMD, type in the command line <code>pip install twython</code> and other packages as above.
+              <h3>Rows</h3>
+              <p>
+                Rows are the actual data in the table. Once you establish the column structure, you can add in as many rows as you like.  It’s OK for cells to be empty, but to a computer intentionally empty is not the same as nonexistent.
               </p>
             </section>
 
             <section>
-              <h3>Part 2.4: Create a SQLite database</h3>
-              <p>Go to <code>http://sqlitebrowser.org/</code> and download SQLite Database Browser. It allows you to view and edit SQLite databases.
+              <h3>Let Data be Data</h3>
+              <p>
+                A database focuses only on the data layer of things and ignores visual presentation. Colors, fonts, borders, date formatting, and number formatting basically don’t exist. What you see is mostly what you get. <strong> A database is designed to plug in to other things.</strong>
+              </p>
+            </section>
+            
+            <section>
+            <section id="fragments_page4">
+              <h3>Ok, this sounds intriguing. How do I get started?</h3>
+                <ul>
+                  <li class="fragment"> SQLite </li>
+                  <li class="fragment"> Microsoft Access</li>
+                  <li class="fragment"> MySQL or PostgreSQL</li>
+                </ul>
+              </section>
+            </section>
+
+            <section>
+              <h2>Part 3: Intro to SQLite with Python</h2>
+            </section>
+
+            <section>
+              <p>
+                Much of the power of ANY relational databases comes from SQL, a very flexible language for asking a database questions or giving it orders. The basic building blocks of SQL are four verbs: <code>SELECT</code> (look up something), <code>UPDATE</code> (change some existing rows), <code>INSERT</code> (add some new rows), <code>DELETE</code> (delete some rows). There are many other verbs but you will use these the most, especially <code>SELECT</code>. 
+              </p>
+            </section>
+
+
+            <section>
+              <img src="img/lingo.png" alt="">
+            </section>
+
+            <section>
+              <p>In general, the only thing that needs to be done before we can perform any operation on a SQLite database via Python's sqlite3 module, is to open a connection to an SQLite database file:
+              </p>
+              <img src="img/start_sqlite1.png" alt="">
+              <p>where the database file (<code>sqlite_file</code>) can reside anywhere on our disk, e.g.,</p>
+              <img src="img/start_sqlite2.png" alt="">
+            </section>
+
+            <section>
+              <p>If we are finished with our operations on the database file, we have to close the connection via the <code>.close()</code> method:</p>
+              <img src="img/start_sqlite3.png" alt="">
+              <p>And if we performed any operation on the database other than sending queries, we need to commit those changes via the <code>.commit()</code> method before we close the connection:</p>
+              <img src="img/start_sqlite4.png" alt="">
+            </section>
+
+           <section>
+             <h3>Creating a new SQLite database</h3>
+             <img src="img/courses_db.png" alt="">
+           </section>
+
+           <section>
+            <h3>Creating a Table</h3>
+             <a href="http://web.mit.edu/aizhan/www/database_ck_workshop/docs/sqlite_start.py">
+              Download the code</a>
+             <img src="img/create_table.png" alt="">
+             
+           </section>
+
+           <section>
+             <img src="img/data_types_sqlite.png" alt="">
+           </section>
+
+           <section>
+             <p>Go to <code>http://sqlitebrowser.org/</code> and download SQLite Database Browser. It allows you to view and edit SQLite databases.
               </p>
               <img src="img/sqlite_browser.png">
-            </section>
+           </section>
+
+           <section>
+              <h3>Adding records</h3>
+             <img src="img/adding_records.png" alt="">
+           </section>
+
+          <section>
+              <h3>Query and print records</h3>
+             <img src="img/query_print.png" alt="">
+           </section>
+
+          <section>
+              <h3>Editing records</h3>
+             <img src="img/editing.png" alt="">
+           </section>
+
+          <section>
+              <h3>Deleting records</h3>
+             <img src="img/deleting.png" alt="">
+           </section>
 
             <section>
-              <p>Go to <strong>File-New Database</strong> to create a new database. </p>
-              <p> Remember the database filename you enter.</p>
-              <p>
-                Add the extension <strong><code>.sqlite</code></strong> when typing filename. (you can also use extension <strong><code>.db</code></strong>)
-              </p>
-            </section>
-
-            <section>
-              <p>Use <strong>File-Import Table From CSV File</strong>, import the <code>.csv</code> file you’ve saved. Name the imported table as <em>accounts</em>. This table name corresponds to the one we will use in Python script. After you click <strong>create</strong>, the csv list will be loaded into the database, and you can browse it in <em>Browse Data</em>. Lastly, remember to save the database. 
-              </p>
-            </section>
-
-            <section>
-              <p>Modify the imported table: Go to <strong>Edit-Modify Tables</strong>, use <em>Edit</em> field to change column names. To correspond to the Python script, name the first column as <em>rowid</em>, and Fileld Type as <code>Integer</code>; the second column as <em>screen_name</em>, and Field type <code>Text</code>, and the third as <em>user_type</em>, and <code>Text</code>. In the end, the database table is defined as the screenshot. 
-
-              </p>
-            </section>
-
-            <section>
-              <h3>Part 2.5: Modify the script and Run</h3>
-              <p><a href="http://web.mit.edu/aizhan/www/twitter_api_workshop/docs/tweets_by_user.py">Download the script</a> and save it as <code>.py</code> file in the same folder where you saved CSV file and the database file. There are just 3 edits you need to make: provide API keys, give correct filepath to database, and provide the name of the table where the data from Twitter will be saved. </p>
-              <p>Within the script, find this block of code, and enter your API Keys.</p>
-              <img src="img/script1_modify.png">
-            </section>
-
-            <section>
-              <p>Find this block of code, and enter the filename and file path of the SQLite database you have created.</p>
-              <img src="img/script2_modify.png">
-            </section>
-
-            <section>
-              <p>You may also refine search criteria:</p>
-              <img src="img/script3_modify.png">
-              <p> <code>count</code> specifies the number of tweets to try and retrieve for each Twitter handle. The maximum value is 200. </p>
-              <p> Read more <a href="https://dev.twitter.com/rest/reference/get/statuses/user_timeline">here</a></p>
-            </section>
-
-            <section>
-              <h3>Some issues you may encounter..</h3>
-              <img src="img/issues_encounter1.png">
-            </section>
-
-            <section>
-              <h3>Some issues you may encounter..</h3>
-              <img src="img/issues_encounter2.png">
-            </section>
-
-            <section>
-              <h2>Load the SQLite data into Excel</h2>
-              <img src="img/load_toexcel.png">
-            </section>
-
-            <section>
-            <section id="fragments_page3">
-              <h3>Important concepts I'd like you to get out of this workshop</h3>
-                <ul>
-                  <li class="fragment"> What is an API </li>
-                  <li class="fragment"> Basic building blocks of Twitter API (oauth, keys, tokens, request, response)</li>
-                  <li class="fragment"> What is database and why is it useful. What is a query</li>
-                  <li class="fragment"> How to navigate through file system of your computer using command line (<code>ls, cd, pwd </code>)</li>
-                  <li class="fragment"> How import statements are structured in a Python script </li>
-                  <li class="fragment"> What is a notion of <code>Class</code> </li>
-                </ul>
-              </section>
+            <p>Challenge: try writing your own python script for <a href="http://web.mit.edu/aizhan/www/database_ck_workshop/docs/">database</a> we used for Twitter API workshop</p>
+            <a href="http://web.mit.edu/aizhan/www/database_ck_workshop/docs/twitter_query.py">
+              Example to get you started</a>
             </section>
 
       </div>
